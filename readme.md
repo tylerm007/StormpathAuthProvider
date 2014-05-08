@@ -8,7 +8,7 @@ Copyright &copy; 2014 Espresso Logic, Inc. and contributors.
 
 This project is open-source via the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
 
-For additional information, please see the [Stormpath Node.js API Documentation](http://docs.stormpath.com/nodejs/api).
+For additional information, please see the [Espresso Logic API Documentation](https://sites.google.com/a/espressologic.com/site/docs/logic-designer/security/authentication#TOC-Custom-Authentication-Provider).
 
 ## Install
 
