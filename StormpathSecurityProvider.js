@@ -1,3 +1,4 @@
+//Upload this JavaScript to EspressoLogic Stormpath Authentication Provider
 function stormpathSecurityProviderCreate() {
 
     var STORMPATH_BASE_URL = 'https://api.stormpath.com/v1/';
@@ -9,6 +10,7 @@ function stormpathSecurityProviderCreate() {
         keyLifetimeMinutes : 60
     };
 
+    //FUNCTION this call must be made first to pass in the required Stormpath configuration values
     result.configure = function configure(myConfig) {
         configSetup.stormpathID = myConfig.stormpathID || "";
         configSetup.stormpathSecret = myConfig.stormpathSecret || "";
@@ -16,6 +18,7 @@ function stormpathSecurityProviderCreate() {
         configSetup.keyLifetimeMinutes = myConfig.keyLifetimeMinutes || 60;
     };
 
+    // the btoa function is not available in Rhino - this is a helper function.
     var encodeBase64 =  function encodeBase64(input) {
         var map = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
@@ -39,6 +42,7 @@ function stormpathSecurityProviderCreate() {
          return output;
     };
 
+    // internal helper function to encode header values
     var createSettings = function () {
         var auth = 'Basic ' + encodeBase64(configSetup.stormpathID + ':' + configSetup.stormpathSecret);
         var params = null;
@@ -48,10 +52,12 @@ function stormpathSecurityProviderCreate() {
         return settings;
     };
 
-    // FUNCTION AUTHENTICATE REQUIRES PAYLOAD {username : '', password : ''}
+    //NOTE: the function configure must be called first - this will validate the stormpath user account
+    //FUNCTION AUTHENTICATE REQUIRES PAYLOAD {username : '', password : ''}
     result.authenticate = function authenticate(payload) {
         var RESERVED_FIELDS_HREF =  [ 'href', 'createdAt', 'modifiedAt'];
 
+        //helper function to return an named value pairs of customData (exlude reserved fields)
         var parseCustomData =  function parseCustomData(result, stringHREF) {
             for (var id in stringHREF) {
                 if (!stringHREF.hasOwnProperty(id)) {
@@ -83,6 +89,7 @@ function stormpathSecurityProviderCreate() {
         var data = {type : "basic", value : '"' + basicAuth + '"' };
 
         try {
+            //POST this JSON request to determine if username and password account is valid
             var loginAttempt = SysUtility.restPost(loginAttemptURL, params, settings, data);
 
             var accountJSON = JSON.parse(loginAttempt);
@@ -90,6 +97,7 @@ function stormpathSecurityProviderCreate() {
                  errorMsg = "Stormpath: " + accountJSON.developerMessage;
             }
             else {
+                //GET the account details and custom data
                 var accountURL = accountJSON.account.href + '?expand=customData';
                 var accountHREF = SysUtility.restGet(accountURL, params, settings);
                 var account = JSON.parse(accountHREF);
@@ -98,7 +106,7 @@ function stormpathSecurityProviderCreate() {
                     resetPasswordURL = account.emailVerificationToken.href;
                     parseCustomData(customDataHREF, account.customData);
                     var groupsURL = account.href+'/groups?expand=customData';
-
+                    //GET the groups customData for this account
                     var responseGroups = SysUtility.restGet(groupsURL, params, settings);
                     var groups = JSON.parse(responseGroups);
                     for (var i = 0; i < groups.items.length; i++) {
@@ -131,6 +139,7 @@ function stormpathSecurityProviderCreate() {
         return autResponse;
     };
 
+    //FUNCTION getAllGroups is used to map all available groups for existing application - DO NOT CHANGE
     result.getAllGroups = function getAllGroups() {
         var roles = [];
         var errorMsg = null;
@@ -159,7 +168,7 @@ function stormpathSecurityProviderCreate() {
 
         return autResponse;
     };
-
+    //FUNCTION getLoginInfo is used to create the logon dialog - DO NOT CHANGE
     result.getLoginInfo = function getLoginInfo() {
         return {
             fields: [

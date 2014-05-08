@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
+ * Copyright 2014 - Espresso Logic
  * Make a simple REST call from JavaScript. These are quite basic. If you need
  * more control, you should probably call a more complete library.
  * Usage:
